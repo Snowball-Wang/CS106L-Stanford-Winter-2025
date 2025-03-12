@@ -1,0 +1,83 @@
+MemoryDiagram {
+  /*
+   * Diagram structure
+   */
+   
+   Diagram 
+    = SubDiagram+ --multi
+    | Frames       --single
+   SubDiagram = identifier "{" Frames "}"
+   Frames = Lines Frame*
+   Frame = identifier Label ":" Lines
+   Lines = Line*
+   Line = Statement | Directive
+    
+
+  /* 
+   * Statements: assignments and allocations
+   */
+  Statement = (Allocation | Assignment)
+  Allocation = identifier heapSymbol Value
+  heapSymbol = "="+ ">"
+  Assignment = identifier Label "=" Value
+  Label = ("(" string ")")?
+
+  Value = Object | ArrayObject | Array | Pointer | ArrayString | StringLiteral | literal
+  
+  Object = (identifier | string)? "{" ListOf<ObjectField, ","> "}"
+  ArrayObject = (identifier | string)? "[" ListOf<ObjectField, ","> "]"
+  ObjectField = identifier Label ":" Value
+
+  Array = "[" ListOf<Value, ","> "]"
+  
+  Pointer = "&" Location
+  Location = identifier (LocationMemberAccess | LocationSubscript)*
+  LocationMemberAccess = "." identifier
+  LocationSubscript = "[" int "]"
+  
+  ArrayString = "b" string
+  StringLiteral = string
+  literal = (~("{" | "}" | "[" | "]" | "," | "\n") any)+
+
+  /* 
+   * Directives, e.g. #style, #label
+   */
+  Directive = LabelDirective | StyleDirective | LayoutDirective
+    
+  LabelDirective = "#label" LabelLocation string
+  LabelLocation = "stack" | "heap" | "title" | "subtitle" | heapSymbol
+    
+  StyleDirective = "#style" (LabelStyle | NodeStyles | LinkStyle)
+  LabelStyle = ":label" Style LabelLocation+
+  NodeStyles = (":" ("value" | "name" | "row"))? Style MultiLocation+
+  LinkStyle = ":link" JsonObject MultiLocation+ 
+  Style = (cssClass | JsonObject)
+
+  LayoutDirective = "#layout" "wide"
+  
+  MultiLocation = identifier (LocationMemberAccess | LocationSubscript | LocationSlice | ".*")*
+  LocationSlice = "[" int? ":" int? (":" int?)? "]"
+  
+  cssClass = (alnum | "_" | "-" | "#")+
+  
+  /*
+   * Utilities and simple JSON parser
+   */ 
+   
+  identifier = (alnum | "_" )+
+  
+  string = "\"" char* "\""
+  char = nonEscape | escape
+  nonEscape = ~("\\" | "\"") any
+  escape = "\\" any
+  
+  number = float | int
+  int = "-"? digit+
+  float = "-"? digit* "." digit+
+  
+  JsonValue = JsonObject | JsonArray | JsonBool | string | number | cssClass
+  JsonObject = "{" ListOf<JsonPair, ","> "}"
+  JsonArray = "[" ListOf<JsonValue, ","> "]"
+  JsonPair = (cssClass | string) ":" JsonValue
+  JsonBool = "true" | "false"
+}
