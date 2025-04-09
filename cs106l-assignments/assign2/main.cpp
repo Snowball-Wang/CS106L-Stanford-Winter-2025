@@ -13,10 +13,8 @@
 #include <set>
 #include <string>
 #include <unordered_set>
-#include <cstdlib>
-#include <ctime>
 
-std::string kYourName = "Masky White"; // Don't forget to change this!
+std::string kYourName = "Jay Wang"; // Don't forget to change this!
 
 /**
  * Takes in a file name and returns a set containing all of the applicant names as a set.
@@ -29,22 +27,26 @@ std::string kYourName = "Masky White"; // Don't forget to change this!
  * below it) to use a `std::unordered_set` instead. If you do so, make sure
  * to also change the corresponding functions in `utils.h`.
  */
-std::set<std::string> get_applicants(std::string filename)
-{
-  // STUDENT TODO: Implement this function.
+std::unordered_set<std::string> get_applicants(std::string filename) {
+  std::ifstream ifs(filename);
+  std::string name;
+  std::unordered_set<std::string> result;
 
-  std::set<std::string> applicants;
-
-  std::ifstream file(filename);
-  std::string line;
-
-  while (std::getline(file, line))
+  /* Check if file can be opened successfully */
+  if(!ifs.is_open())
   {
-    applicants.insert(line);
+    throw std::runtime_error("Unable to open the file");
   }
 
-  file.close();
-  return applicants;
+  /* Read each name from the file and put them into the unordered set */
+  while(std::getline(ifs, name))
+  {
+    result.insert(name);
+  }
+
+  /* close file */
+  ifs.close();
+  return result;
 }
 
 /**
@@ -55,37 +57,19 @@ std::set<std::string> get_applicants(std::string filename)
  * @param students  The set of student names.
  * @return          A queue containing pointers to each matching name.
  */
-std::queue<const std::string *> find_matches(std::string name, std::set<std::string> &students)
-{
-  // STUDENT TODO: Implement this function.
-  std::queue<const std::string *> matches;
-
-  // Helper function to get initials from a name
-  auto get_initials = [](const std::string &full_name) -> std::string {
-    std::string initials;
-    bool new_word = true;
-
-    for (char ch : full_name) {
-      if (new_word && std::isalpha(ch)) {
-        initials += std::toupper(ch);
-        new_word = false;
-      }
-      else if (ch == ' ') {
-        new_word = true;
-      }
-    }
-    return initials;
-  };
-
-  std::string target_initials = get_initials(name);
-
-  // Find all names with matching initials
-  for (const auto& student : students) {
-    if ( student != name && target_initials == get_initials(student)) {
+std::queue<const std::string*> find_matches(std::string name, std::unordered_set<std::string>& students) {
+  
+  std::queue<const std::string*> matches;
+  
+  /* Traverse through the unordered set */
+  for(const auto &student: students)
+  {
+    if((name[0] == student[0]) && (name[name.find(' ') + 1] == student[student.find(' ') + 1]))
+    {
+      std::cout << student << std::endl;
       matches.push(&student);
     }
   }
-
   return matches;
 }
 
@@ -99,31 +83,20 @@ std::queue<const std::string *> find_matches(std::string name, std::set<std::str
  * @return        Your magical one true love.
  *                Will return "NO MATCHES FOUND." if `matches` is empty.
  */
-std::string get_match(std::queue<const std::string *> &matches)
-{
-  // STUDENT TODO: Implement this function.
-
-  // If no matches are found, return an error message
-  if (matches.empty()) {
-    return "NO MATCHES FOUND.";
+std::string get_match(std::queue<const std::string*>& matches) {
+  std::string result;
+  /* If the matches are empty, return the designated string. 
+   * Return the last element in the queue otherwise.
+   */
+  if (matches.empty())
+  {
+    result = "NO MATCHES FOUND.";
   }
-
-  // If there is only one match, return it
-  size_t queue_size = matches.size();
-  if (queue_size == 1) {
-    return *matches.front();
+  else
+  {
+    result = *matches.back();
   }
-
-  // Generate a random position in the queue
-  size_t target_pos = rand() % queue_size;
-
-  // Move through the queue until we reach the target position  
-  for (size_t i = 0; i < target_pos; i++) {
-    matches.push(matches.front());
-    matches.pop();
-  }
-
-  return *matches.front();
+  return result;
 }
 
 /* #### Please don't remove this line! #### */
