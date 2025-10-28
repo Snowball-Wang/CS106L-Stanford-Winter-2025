@@ -5,7 +5,16 @@ Make a Class
 ------------
 
 Q1. What’s const-correctness and why is it important?
-A1. TODO
-
+Const-correctness means using the const keyword properly to indicate which variables, function parameters, or member functions should not modify the data they refer to.
+It's about promising not to change something that shouldn't be changed --- and letting the compiler help you enforce that promise.
+Why const-correctness is important:
+* Prevents accidental modification
+** The compiler stops you from changing things that shouldn't change.
+* Makes code easier to understand
+** When const is seen, you would immediately know: "This function won't modify the object".
+* Enables const objects and references
+* Improves compiler optimizations
+** The compiler can make more assumptions about immutability.
 Q2. Is your class const-correct? How do you know?
-A2. TODO
+My class is already const-correct in the sense that every "read-only" operation is marked const,
+and all mutating operations are non-const. I can call all getters and display() on a const ArmID, but I can't call the setters --- exactly what we want.
