@@ -20,13 +20,17 @@ std::vector<Iterator> find_all(Iterator begin, Iterator end, UnaryPred pred) {
 }
 
 void Token::clean(const std::string& source) {
+  /* Reconstruct the original token range in source */
   auto begin = source.begin() + src_offset;
   auto end = source.begin() + src_offset + content.size();
 
+  /* Find the first alphanumeric character */
   auto left = std::find_if(begin, end, ::isalnum);
+  /* Find the last alphanumeric character */
   auto right =
       std::find_if(std::make_reverse_iterator(end), std::make_reverse_iterator(begin), ::isalnum)
           .base();
+  /* Adjust the token offset */
   src_offset += std::distance(begin, left);
 
   if (left < right) {
@@ -35,6 +39,7 @@ void Token::clean(const std::string& source) {
     content = "";
   }
 
+  /* Convert to lowercase */
   std::transform(content.begin(), content.end(), content.begin(), ::tolower);
 }
 
